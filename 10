@@ -1,17 +1,53 @@
-import random
-import sys
-import os
+@echo off
+:: Begin your batch script with this
+color 3f
 
-print "Hello, World!"
-#comment
-print ("two=", 5-3)
-print ("eight=", 8-0)
+echo This is how you display your raw text
+pause
+echo Here's some basic commands
 
-generic_test = 12
-if generic_test >= 21 :
-    print("n")
-else :
-    print("y")
+:: example command for password policies
+net accounts /minpwlen: 14
+
+:: example command for auditpols
+auditpol /set /category:"Account Logon" /success:enable
+
+echo You can also install .exes to do some other hardening
+::copy %path%resources\ntrights.exe C:\Windows\System32
+    :: NTRIGHTS -u Users +r SeBatchLogonRight
+    ::   SeDenyBatchLogonRight,                       // Deny log on as a batch job
     
-'''The quick brown fox jumped over the lazy dog'''
+echo Using registry commands are helpful for secpol
+:: Restrict CD ROM drive
+reg ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AllocateCDRoms /t REG_DWORD /d 1 /f
+:: the 1 / 0 indicates the status of the policy
 
+echo Or you can run secpol straight up
+pause
+start secpol.msc /wait
+
+echo Bonus: here's the pathway for UAC controls :: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+echo User Account Control Settings. 
+pause 
+echo Will require a restart.
+pause
+:: then add in the correct edited pathways (this goes from 1 -4, look up what each policy number should be at microsoft )
+
+echo You can also edit services with reg keys
+REG add "HKLM\SYSTEM\CurrentControlSet\services\NetTcpPortSharing" /v Start /t REG_DWORD /d 4 /f
+
+echo In case of forensics questions, it's helpful to look for files before deleting them
+for /r %%i in (*.mp3) do echo %%~ti %%~zi %%i
+:: Searches and displays all instances of mp3 files
+
+echo As for policies that are readme dependent, you can do conditionals
+::disabling Remote Desktop - Yes / No
+set /P c=Are you sure you want to disable Remote Desktop[Y/N]?
+if /I "%c%" EQU "Y" REG add "HKLM\SYSTEM\CurrentControlSet\services\TermService" /v Start /t REG_DWORD /d 4 /f
+if /I "%c%" EQU "N" REG add "HKLM\SYSTEM\CurrentControlSet\services\TermService" /v Start /t REG_DWORD /d 2 /f
+
+pause
+
+echo AND MAKE SURE YOU RUN THIS AT EVERY INSTANCE POSSIBLE
+shutdown.exe /r /t 00
+:: no don't
