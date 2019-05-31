@@ -1,0 +1,16 @@
+import sys
+import time
+
+strPath = "C:\Users\saiberstorm\Documents\ScoringReport.txt"
+# or whatever may the pathway be
+
+
+print("Listings of known values...")
+
+with open(strPath, 'rt') as f:
+    while True:
+        time.sleep(0.2)
+        line = f.readline()
+        if not line:
+            break
+        sys.stdout.write(line)
